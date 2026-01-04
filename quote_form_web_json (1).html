@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morton Quoting Intake Form</title>
+  <script>
+    function handleSubmit(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const data = {};
+      formData.forEach((value, key) => {
+        if (data[key]) {
+          if (!Array.isArray(data[key])) data[key] = [data[key]];
+          data[key].push(value);
+        } else {
+          data[key] = value;
+        }
+      });
+      const webhookUrl = document.getElementById("webhookUrl").value;
+      fetch(webhookUrl, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => alert("Form submitted successfully!"))
+      .catch(error => alert("Submission failed. Check the console."));
+    }
+  </script>
+</head>
+<body>
+  <h1>Morton Quoting Intake Form</h1>
+  <form onsubmit="handleSubmit(event)">
+    <fieldset>
+      <legend>Webhook & Attachments</legend>
+      <label>n8n Webhook URL: <input type="url" id="webhookUrl" required /></label><br/>
+      <label>Upload Reference Files: <input type="file" name="attachments" multiple /></label><br/>
+    </fieldset>
+
+    <fieldset>
+      <legend>1. Contact Info</legend>
+      <label>Company Name: <input name="company_name" required /></label><br/>
+      <label>Contact Name: <input name="contact_name" required /></label><br/>
+      <label>Email Address: <input type="email" name="email" required /></label><br/>
+      <label>Project Name: <input name="project_name" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>2. Application Type</legend>
+      <label><input type="radio" name="application_type" value="UL891" /> UL891</label><br/>
+      <label><input type="radio" name="application_type" value="MCC" /> MCC</label><br/>
+      <label><input type="radio" name="application_type" value="UL508A" /> UL508A</label><br/>
+      <label><input type="radio" name="application_type" value="Other" /> Other</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>3. NEMA Rating</legend>
+      <label><input type="radio" name="nema" value="NEMA 1" /> NEMA 1</label><br/>
+      <label><input type="radio" name="nema" value="NEMA 3R" /> NEMA 3R</label><br/>
+      <label><input type="radio" name="nema" value="NEMA 4" /> NEMA 4</label><br/>
+      <label><input type="radio" name="nema" value="NEMA 4X" /> NEMA 4X</label><br/>
+      <label><input type="radio" name="nema" value="NEMA 12" /> NEMA 12</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>4. Enclosure Type(s)</legend>
+      <label><input type="checkbox" name="enclosure_type" value="MCB" /> MCB</label><br/>
+      <label><input type="checkbox" name="enclosure_type" value="PNL" /> PNL</label><br/>
+      <label><input type="checkbox" name="enclosure_type" value="PCB" /> PCB / PCC</label><br/>
+      <label><input type="checkbox" name="enclosure_type" value="TBKT" /> TBKT</label><br/>
+      <label><input type="checkbox" name="enclosure_type" value="Skid" /> Welded Skid / Base Frame</label><br/>
+      <label>Other: <input name="enclosure_other" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>5. Overall Dimensions (HxWxD in inches)</legend>
+      <label>MCB: <input name="mcb_dimensions" /></label><br/>
+      <label>PNL: <input name="pnl_dimensions" /></label><br/>
+      <label>Bucket: <input name="bucket_dimensions" /></label><br/>
+      <label>Skid Frame: <input name="skid_dimensions" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>6. Material, Gauge & Finish</legend>
+      <label>Powder Coat Color: <input name="powder_color" /></label><br/>
+      <label><input type="radio" name="material" value="Carbon Steel" /> Carbon Steel</label><br/>
+      <label><input type="radio" name="material" value="Stainless Steel" /> Stainless Steel</label><br/>
+      <label><input type="radio" name="material" value="Aluminum" /> Aluminum</label><br/>
+      <label>MCB GA: <input name="mcb_gauge" /></label>
+      <label>PNL GA: <input name="pnl_gauge" /></label>
+      <label>TBKT GA: <input name="tbkt_gauge" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>7. Door & Access</legend>
+      <label>Number of Doors: <input name="door_qty" /></label><br/>
+      <label><input type="radio" name="door_type" value="Single" /> Single</label><br/>
+      <label><input type="radio" name="door_type" value="Split" /> Split</label><br/>
+      <label><input type="radio" name="access_method" value="3-Point Latch" /> 3-Point Latch</label><br/>
+      <label><input type="radio" name="access_method" value="Quarter Turn" /> Quarter Turn</label><br/>
+      <label><input type="radio" name="access_method" value="Concealed Hinges" /> Concealed Hinges</label><br/>
+      <label>Rear / Side Access? <input type="checkbox" name="rear_side_access" value="Yes" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>8. Internal Panel - PNL</legend>
+      <label>Panel Sections: <input name="panel_sections" /></label><br/>
+      <label>Panels per Section: <input name="panels_per_section" /></label><br/>
+      <label><input type="radio" name="panel_mount" value="Brackets" /> Brackets</label><br/>
+      <label><input type="radio" name="panel_mount" value="Back Mount" /> Back of enclosure</label><br/>
+      <label><input type="radio" name="panel_mount" value="Standoffs" /> Freestanding standoffs</label><br/>
+      <label>Brackets/Gussets? <input type="checkbox" name="gussets" value="Yes" /></label><br/>
+      <label>Accessories: <input name="panel_accessories" /></label><br/>
+      <label><input type="radio" name="lineup" value="Standalone" /> Standalone</label><br/>
+      <label><input type="radio" name="lineup" value="Lineup" /> Part of a lineup</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>9. Internal Panel - MCB</legend>
+      <label>Qty: <input name="mcb_internal_qty" /></label><br/>
+      <label><input type="radio" name="mcb_mount" value="Fixed" /> Fixed</label><br/>
+      <label><input type="radio" name="mcb_mount" value="Removable" /> Removable</label><br/>
+      <label>Mounting: <input name="mcb_mounting" /></label><br/>
+      <label>Gasketing? <input type="checkbox" name="mcb_gasketing" value="Yes" /></label><br/>
+      <label>Other accessories: <input name="mcb_accessories" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>10. Weld & Mounting</legend>
+      <label><input type="radio" name="seam_type" value="Fully welded" /> Fully welded</label><br/>
+      <label><input type="radio" name="seam_type" value="Stitch welded" /> Stitch/spot welded</label><br/>
+      <label><input type="radio" name="seam_type" value="Bolted" /> No welding (bolted)</label><br/>
+      <label>Internal panel layouts the same? <input name="layout_same" /></label><br/>
+      <label>Support method: <input name="support_method" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>11. Accessories & Components</legend>
+      <label>Hat Rails Qty: <input name="hat_rails" /></label><br/>
+      <label>Shelves/Trays: <input name="shelves" /></label><br/>
+      <label>Dead Front Panels Qty: <input name="dead_fronts" /></label><br/>
+      <label>Wire Trays? <input type="checkbox" name="wire_trays" value="Yes" /></label><br/>
+      <label>Gasketing? <input type="checkbox" name="gasketing" value="Yes" /></label><br/>
+      <label>Special Components: <input name="special_components" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>12. Skid / Base Frame</legend>
+      <label>Dimensions (inches): <input name="skid_dims" /></label><br/>
+      <label>Base Channels: <input name="base_channels" /></label><br/>
+      <label>Crossmembers: <input name="crossmembers" /></label><br/>
+      <label>Skid Type: <input name="skid_type" /></label><br/>
+      <label>Hardware Required? <input type="checkbox" name="skid_hardware" value="Yes" /></label><br/>
+      <label>Paint Required? <input type="checkbox" name="skid_paint" value="Yes" /></label>
+    </fieldset>
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
