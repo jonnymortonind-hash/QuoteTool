@@ -1,162 +1,239 @@
-<!DOCTYPE html>
+
+
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Morton Quoting Intake Form</title>
-  <script>
-    function handleSubmit(event) {
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const data = {};
-      formData.forEach((value, key) => {
-        if (data[key]) {
-          if (!Array.isArray(data[key])) data[key] = [data[key]];
-          data[key].push(value);
-        } else {
-          data[key] = value;
-        }
-      });
-      const webhookUrl = document.getElementById("webhookUrl").value;
-      fetch(webhookUrl, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(response => alert("Form submitted successfully!"))
-      .catch(error => alert("Submission failed. Check the console."));
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Morton Industries RFQ / Quote Intake</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #111; }
+    .card { max-width: 920px; padding: 18px; border: 1px solid #ddd; border-radius: 10px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .field { flex: 1; min-width: 240px; margin: 10px 0; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
+      font-size: 14px; box-sizing: border-box;
     }
-  </script>
+    textarea { min-height: 90px; }
+    .hint { font-size: 12px; color: #555; margin-top: 6px; }
+    button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+    button.primary { background: #111; color: #fff; }
+    button.secondary { background: #eee; color: #111; }
+    pre { white-space: pre-wrap; background: #f7f7f7; padding: 12px; border-radius: 8px; border: 1px solid #eee; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .divider { height: 1px; background: #eee; margin: 16px 0; }
+  </style>
 </head>
 <body>
-  <h1>Morton Quoting Intake Form</h1>
-  <form onsubmit="handleSubmit(event)">
-    <fieldset>
-      <legend>Webhook & Attachments</legend>
-      <label>n8n Webhook URL: <input type="url" id="webhookUrl" required /></label><br/>
-      <label>Upload Reference Files: <input type="file" name="attachments" multiple /></label><br/>
-    </fieldset>
+  <div class="card">
+    <h2 style="margin:0 0 8px 0;">RFQ / Quote Intake</h2>
+    <div class="hint">Fill out the questionnaire and attach any drawings / RFQ docs. You can select multiple files.</div>
 
-    <fieldset>
-      <legend>1. Contact Info</legend>
-      <label>Company Name: <input name="company_name" required /></label><br/>
-      <label>Contact Name: <input name="contact_name" required /></label><br/>
-      <label>Email Address: <input type="email" name="email" required /></label><br/>
-      <label>Project Name: <input name="project_name" /></label>
-    </fieldset>
+    <form id="rfqForm">
+      <!-- =========================
+           QUESTIONNAIRE SECTION
+           ========================= -->
+      <div class="divider"></div>
+      <h3 style="margin:0 0 8px 0;">Questionnaire</h3>
 
-    <fieldset>
-      <legend>2. Application Type</legend>
-      <label><input type="radio" name="application_type" value="UL891" /> UL891</label><br/>
-      <label><input type="radio" name="application_type" value="MCC" /> MCC</label><br/>
-      <label><input type="radio" name="application_type" value="UL508A" /> UL508A</label><br/>
-      <label><input type="radio" name="application_type" value="Other" /> Other</label>
-    </fieldset>
+      <div class="row">
+        <div class="field">
+          <label for="rfqNumber">RFQ Number</label>
+          <input id="rfqNumber" name="rfqNumber" type="text" placeholder="RFQ-12345" />
+        </div>
 
-    <fieldset>
-      <legend>3. NEMA Rating</legend>
-      <label><input type="radio" name="nema" value="NEMA 1" /> NEMA 1</label><br/>
-      <label><input type="radio" name="nema" value="NEMA 3R" /> NEMA 3R</label><br/>
-      <label><input type="radio" name="nema" value="NEMA 4" /> NEMA 4</label><br/>
-      <label><input type="radio" name="nema" value="NEMA 4X" /> NEMA 4X</label><br/>
-      <label><input type="radio" name="nema" value="NEMA 12" /> NEMA 12</label>
-    </fieldset>
+        <div class="field">
+          <label for="quoteNumber">Quote Number (if assigned)</label>
+          <input id="quoteNumber" name="quoteNumber" type="text" placeholder="Q-67890" />
+        </div>
 
-    <fieldset>
-      <legend>4. Enclosure Type(s)</legend>
-      <label><input type="checkbox" name="enclosure_type" value="MCB" /> MCB</label><br/>
-      <label><input type="checkbox" name="enclosure_type" value="PNL" /> PNL</label><br/>
-      <label><input type="checkbox" name="enclosure_type" value="PCB" /> PCB / PCC</label><br/>
-      <label><input type="checkbox" name="enclosure_type" value="TBKT" /> TBKT</label><br/>
-      <label><input type="checkbox" name="enclosure_type" value="Skid" /> Welded Skid / Base Frame</label><br/>
-      <label>Other: <input name="enclosure_other" /></label>
-    </fieldset>
+        <div class="field">
+          <label for="customerName">Customer</label>
+          <input id="customerName" name="customerName" type="text" placeholder="Customer name" />
+        </div>
+      </div>
 
-    <fieldset>
-      <legend>5. Overall Dimensions (HxWxD in inches)</legend>
-      <label>MCB: <input name="mcb_dimensions" /></label><br/>
-      <label>PNL: <input name="pnl_dimensions" /></label><br/>
-      <label>Bucket: <input name="bucket_dimensions" /></label><br/>
-      <label>Skid Frame: <input name="skid_dimensions" /></label>
-    </fieldset>
+      <div class="row">
+        <div class="field">
+          <label for="enclosureType">Enclosure Type</label>
+          <select id="enclosureType" name="enclosureType">
+            <option value="">Select…</option>
+            <option value="MCB">MCB</option>
+            <option value="PNL">PNL</option>
+            <option value="MCB+PNL">MCB + PNL</option>
+          </select>
+          <div class="hint">Use your existing options here if different.</div>
+        </div>
 
-    <fieldset>
-      <legend>6. Material, Gauge & Finish</legend>
-      <label>Powder Coat Color: <input name="powder_color" /></label><br/>
-      <label><input type="radio" name="material" value="Carbon Steel" /> Carbon Steel</label><br/>
-      <label><input type="radio" name="material" value="Stainless Steel" /> Stainless Steel</label><br/>
-      <label><input type="radio" name="material" value="Aluminum" /> Aluminum</label><br/>
-      <label>MCB GA: <input name="mcb_gauge" /></label>
-      <label>PNL GA: <input name="pnl_gauge" /></label>
-      <label>TBKT GA: <input name="tbkt_gauge" /></label>
-    </fieldset>
+        <div class="field">
+          <label for="application">Application</label>
+          <select id="application" name="application">
+            <option value="">Select…</option>
+            <option value="UL891">UL891</option>
+            <option value="UL508A">UL508A</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
 
-    <fieldset>
-      <legend>7. Door & Access</legend>
-      <label>Number of Doors: <input name="door_qty" /></label><br/>
-      <label><input type="radio" name="door_type" value="Single" /> Single</label><br/>
-      <label><input type="radio" name="door_type" value="Split" /> Split</label><br/>
-      <label><input type="radio" name="access_method" value="3-Point Latch" /> 3-Point Latch</label><br/>
-      <label><input type="radio" name="access_method" value="Quarter Turn" /> Quarter Turn</label><br/>
-      <label><input type="radio" name="access_method" value="Concealed Hinges" /> Concealed Hinges</label><br/>
-      <label>Rear / Side Access? <input type="checkbox" name="rear_side_access" value="Yes" /></label>
-    </fieldset>
+        <div class="field">
+          <label for="plant">Preferred Plant</label>
+          <select id="plant" name="plant">
+            <option value="">Default (Fort Worth, TX)</option>
+            <option value="Fort Worth, TX">Fort Worth, TX</option>
+            <option value="Tennessee">Tennessee</option>
+          </select>
+        </div>
+      </div>
 
-    <fieldset>
-      <legend>8. Internal Panel - PNL</legend>
-      <label>Panel Sections: <input name="panel_sections" /></label><br/>
-      <label>Panels per Section: <input name="panels_per_section" /></label><br/>
-      <label><input type="radio" name="panel_mount" value="Brackets" /> Brackets</label><br/>
-      <label><input type="radio" name="panel_mount" value="Back Mount" /> Back of enclosure</label><br/>
-      <label><input type="radio" name="panel_mount" value="Standoffs" /> Freestanding standoffs</label><br/>
-      <label>Brackets/Gussets? <input type="checkbox" name="gussets" value="Yes" /></label><br/>
-      <label>Accessories: <input name="panel_accessories" /></label><br/>
-      <label><input type="radio" name="lineup" value="Standalone" /> Standalone</label><br/>
-      <label><input type="radio" name="lineup" value="Lineup" /> Part of a lineup</label>
-    </fieldset>
+      <div class="row">
+        <div class="field">
+          <label for="mcbDimensions">MCB Dimensions (HxWxD)</label>
+          <input id="mcbDimensions" name="mcbDimensions" type="text" placeholder='e.g. 15x14x21' />
+        </div>
 
-    <fieldset>
-      <legend>9. Internal Panel - MCB</legend>
-      <label>Qty: <input name="mcb_internal_qty" /></label><br/>
-      <label><input type="radio" name="mcb_mount" value="Fixed" /> Fixed</label><br/>
-      <label><input type="radio" name="mcb_mount" value="Removable" /> Removable</label><br/>
-      <label>Mounting: <input name="mcb_mounting" /></label><br/>
-      <label>Gasketing? <input type="checkbox" name="mcb_gasketing" value="Yes" /></label><br/>
-      <label>Other accessories: <input name="mcb_accessories" /></label>
-    </fieldset>
+        <div class="field">
+          <label for="pnlDimensions">PNL Dimensions (HxWxD)</label>
+          <input id="pnlDimensions" name="pnlDimensions" type="text" placeholder='e.g. 20x20x10' />
+        </div>
 
-    <fieldset>
-      <legend>10. Weld & Mounting</legend>
-      <label><input type="radio" name="seam_type" value="Fully welded" /> Fully welded</label><br/>
-      <label><input type="radio" name="seam_type" value="Stitch welded" /> Stitch/spot welded</label><br/>
-      <label><input type="radio" name="seam_type" value="Bolted" /> No welding (bolted)</label><br/>
-      <label>Internal panel layouts the same? <input name="layout_same" /></label><br/>
-      <label>Support method: <input name="support_method" /></label>
-    </fieldset>
+        <div class="field">
+          <label for="material">Material</label>
+          <select id="material" name="material">
+            <option value="">Select…</option>
+            <option value="Stainless">Stainless</option>
+            <option value="Carbon Steel">Carbon Steel</option>
+            <option value="Aluminum">Aluminum</option>
+          </select>
+        </div>
+      </div>
 
-    <fieldset>
-      <legend>11. Accessories & Components</legend>
-      <label>Hat Rails Qty: <input name="hat_rails" /></label><br/>
-      <label>Shelves/Trays: <input name="shelves" /></label><br/>
-      <label>Dead Front Panels Qty: <input name="dead_fronts" /></label><br/>
-      <label>Wire Trays? <input type="checkbox" name="wire_trays" value="Yes" /></label><br/>
-      <label>Gasketing? <input type="checkbox" name="gasketing" value="Yes" /></label><br/>
-      <label>Special Components: <input name="special_components" /></label>
-    </fieldset>
+      <div class="row">
+        <div class="field">
+          <label for="qty">Requested Quantity (base)</label>
+          <input id="qty" name="qty" type="number" min="1" step="1" value="1" />
+        </div>
 
-    <fieldset>
-      <legend>12. Skid / Base Frame</legend>
-      <label>Dimensions (inches): <input name="skid_dims" /></label><br/>
-      <label>Base Channels: <input name="base_channels" /></label><br/>
-      <label>Crossmembers: <input name="crossmembers" /></label><br/>
-      <label>Skid Type: <input name="skid_type" /></label><br/>
-      <label>Hardware Required? <input type="checkbox" name="skid_hardware" value="Yes" /></label><br/>
-      <label>Paint Required? <input type="checkbox" name="skid_paint" value="Yes" /></label>
-    </fieldset>
+        <div class="field">
+          <label for="includeSkid">Include Skid?</label>
+          <select id="includeSkid" name="includeSkid">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
 
-    <button type="submit">Submit</button>
-  </form>
+        <div class="field">
+          <label for="color">Finish / Color</label>
+          <input id="color" name="color" type="text" placeholder="e.g. Blue, ANSI 61, etc." />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="notes">Notes / Requirements</label>
+        <textarea id="notes" name="notes" placeholder="Add any special requirements, cutouts, latches, NEMA rating, etc."></textarea>
+      </div>
+
+      <!-- =========================
+           FILE UPLOAD SECTION (ADDED)
+           ========================= -->
+      <div class="divider"></div>
+      <h3 style="margin:0 0 8px 0;">Attachments</h3>
+
+      <div class="field">
+        <label for="rfqFiles">Upload files (multiple allowed)</label>
+        <input id="rfqFiles" name="files" type="file" multiple />
+        <div id="rfqFilesList" class="mono hint">No files selected.</div>
+        <div class="hint">Supported: PDF, XLSX, DOCX, images. Select multiple files in one upload.</div>
+      </div>
+
+      <div class="divider"></div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="primary" type="submit">Submit to n8n</button>
+        <button class="secondary" type="button" id="clearBtn">Clear</button>
+      </div>
+    </form>
+
+    <div class="divider"></div>
+    <h3 style="margin:0 0 8px 0;">Status</h3>
+    <pre id="status" class="mono">Idle.</pre>
+  </div>
+
+  <script>
+    // ========= CONFIG =========
+    // Replace this with your actual n8n Webhook URL
+    const WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/rfq-upload";
+    // ==========================
+
+    const form = document.getElementById("rfqForm");
+    const statusEl = document.getElementById("status");
+    const clearBtn = document.getElementById("clearBtn");
+    const filesEl = document.getElementById("rfqFiles");
+    const fileListEl = document.getElementById("rfqFilesList");
+
+    function renderSelectedFiles() {
+      const files = Array.from(filesEl.files || []);
+      if (!files.length) {
+        fileListEl.textContent = "No files selected.";
+        return;
+      }
+      fileListEl.textContent = files
+        .map((f, i) => `${i + 1}. ${f.name} (${Math.round(f.size / 1024)} KB)`)
+        .join("\n");
+    }
+
+    filesEl.addEventListener("change", renderSelectedFiles);
+    renderSelectedFiles();
+
+    clearBtn.addEventListener("click", () => {
+      form.reset();
+      // Reset file list UI
+      fileListEl.textContent = "No files selected.";
+      statusEl.textContent = "Cleared.";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      statusEl.textContent = "Submitting...";
+
+      // IMPORTANT:
+      // We use FormData so files are sent as multipart/form-data binaries.
+      // This includes all questionnaire fields automatically.
+      const fd = new FormData(form);
+
+      // Ensure multi-file upload: append each file under the SAME key "files"
+      // (Some browsers already include it via FormData(form), but this is explicit and reliable.)
+      fd.delete("files");
+      const files = Array.from(filesEl.files || []);
+      for (const f of files) {
+        fd.append("files", f, f.name);
+      }
+
+      // Optional: include a count for easier debugging in n8n
+      fd.append("uploadCount", String(files.length));
+
+      try {
+        const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+
+        const contentType = res.headers.get("content-type") || "";
+        let bodyText;
+        if (contentType.includes("application/json")) {
+          const json = await res.json();
+          bodyText = JSON.stringify(json, null, 2);
+        } else {
+          bodyText = await res.text();
+        }
+
+        statusEl.textContent =
+          `Server response (${res.status})\n` +
+          `Files sent: ${files.length}\n\n` +
+          bodyText;
+
+      } catch (err) {
+        statusEl.textContent = "Submit failed: " + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
