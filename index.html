@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -33,6 +31,25 @@
 
     <form id="rfqForm">
       <!-- =========================
+           INTEGRATION SECTION
+           ========================= -->
+      <div class="divider"></div>
+      <h3 style="margin:0 0 8px 0;">Integration</h3>
+
+      <div class="field">
+        <label for="webhookUrl">n8n Webhook URL</label>
+        <input
+          id="webhookUrl"
+          name="webhookUrl"
+          type="text"
+          class="mono"
+          placeholder="https://n8n.yourdomain.com/webhook/xyz"
+          required
+        />
+        <div class="hint">This is the n8n webhook that will receive the RFQ + files. It will be saved in this browser.</div>
+      </div>
+
+      <!-- =========================
            QUESTIONNAIRE SECTION
            ========================= -->
       <div class="divider"></div>
@@ -45,45 +62,44 @@
         </div>
 
         <div class="field">
-          <label for="quoteNumber">Quote Number (if assigned)</label>
-          <input id="quoteNumber" name="quoteNumber" type="text" placeholder="Q-67890" />
+          <label for="customerName">Customer</label>
+          <input id="customerName" name="customerName" type="text" placeholder="Customer name" />
         </div>
 
         <div class="field">
-          <label for="customerName">Customer</label>
-          <input id="customerName" name="customerName" type="text" placeholder="Customer name" />
+          <label for="enclosureType">Enclosure Type</label>
+          <input id="enclosureType" name="enclosureType" type="text" list="enclosureTypeList" placeholder="Select or type…" />
+          <datalist id="enclosureTypeList">
+            <option value="MCB"></option>
+            <option value="PNL"></option>
+            <option value="MCB + PNL"></option>
+          </datalist>
+          <div class="hint">Pick from the list or type a custom enclosure type.</div>
         </div>
       </div>
 
       <div class="row">
         <div class="field">
-          <label for="enclosureType">Enclosure Type</label>
-          <select id="enclosureType" name="enclosureType">
-            <option value="">Select…</option>
-            <option value="MCB">MCB</option>
-            <option value="PNL">PNL</option>
-            <option value="MCB+PNL">MCB + PNL</option>
-          </select>
-          <div class="hint">Use your existing options here if different.</div>
-        </div>
-
-        <div class="field">
-          <label for="application">Application</label>
-          <select id="application" name="application">
-            <option value="">Select…</option>
-            <option value="UL891">UL891</option>
-            <option value="UL508A">UL508A</option>
-            <option value="Other">Other</option>
-          </select>
+          <label for="application">Compliance / Certification Rating</label>
+          <input id="application" name="application" type="text" list="applicationList" placeholder="Select or type…" />
+          <datalist id="applicationList">
+            <option value="NEMA 3R (Outdoor)"></option>
+            <option value="NEMA 12 (Indoor)"></option>
+          </datalist>
         </div>
 
         <div class="field">
           <label for="plant">Preferred Plant</label>
-          <select id="plant" name="plant">
-            <option value="">Default (Fort Worth, TX)</option>
-            <option value="Fort Worth, TX">Fort Worth, TX</option>
-            <option value="Tennessee">Tennessee</option>
-          </select>
+          <input id="plant" name="plant" type="text" list="plantList" placeholder="Default (Fort Worth, TX) or type…" />
+          <datalist id="plantList">
+            <option value="Fort Worth, TX"></option>
+            <option value="Tennessee"></option>
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label for="qty">Requested Quantity (base)</label>
+          <input id="qty" name="qty" type="number" min="1" step="1" value="1" />
         </div>
       </div>
 
@@ -99,33 +115,100 @@
         </div>
 
         <div class="field">
-          <label for="material">Material</label>
-          <select id="material" name="material">
-            <option value="">Select…</option>
-            <option value="Stainless">Stainless</option>
-            <option value="Carbon Steel">Carbon Steel</option>
-            <option value="Aluminum">Aluminum</option>
-          </select>
+          <label for="includeSkid">Include Skid?</label>
+          <input id="includeSkid" name="includeSkid" type="text" list="includeSkidList" placeholder="Select or type…" value="no" />
+          <datalist id="includeSkidList">
+            <option value="no"></option>
+            <option value="yes"></option>
+          </datalist>
+        </div>
+      </div>
+
+      <!-- =========================
+           MCB CONFIG (ADDED)
+           ========================= -->
+      <div class="divider"></div>
+      <h3 style="margin:0 0 8px 0;">MCB</h3>
+
+      <div class="row">
+        <div class="field">
+          <label for="mcbMaterial">MCB Material</label>
+          <input id="mcbMaterial" name="mcbMaterial" type="text" list="materialList" placeholder="Select or type…" />
+          <datalist id="materialList">
+            <option value="Stainless"></option>
+            <option value="Carbon Steel"></option>
+            <option value="Aluminum"></option>
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label for="mcbFinish">MCB Finish / Color</label>
+          <input id="mcbFinish" name="mcbFinish" type="text" placeholder="e.g. Blue, ANSI 61, etc." />
         </div>
       </div>
 
       <div class="row">
         <div class="field">
-          <label for="qty">Requested Quantity (base)</label>
-          <input id="qty" name="qty" type="number" min="1" step="1" value="1" />
+          <label for="mcbDoorCount">MCB Number of Doors</label>
+          <input id="mcbDoorCount" name="mcbDoorCount" type="number" min="0" step="1" value="1" />
+          <div class="hint">Set to 0 if no doors.</div>
         </div>
 
         <div class="field">
-          <label for="includeSkid">Include Skid?</label>
-          <select id="includeSkid" name="includeSkid">
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
+          <label for="mcbLatchType">MCB Latch Type</label>
+          <input id="mcbLatchType" name="mcbLatchType" type="text" list="latchList" placeholder="Select or type…" />
+          <datalist id="latchList">
+            <option value="3-point"></option>
+            <option value="Quarter-turn"></option>
+            <option value="Padlockable"></option>
+            <option value="Keyed"></option>
+            <option value="Handle"></option>
+          </datalist>
+        </div>
+      </div>
+
+      <!-- =========================
+           PNL/PCB CONFIG (ADDED)
+           NOTE: User asked "PCB" - leaving it as PCB section label,
+           but keeping existing PNL dimensions field unchanged.
+           ========================= -->
+      <div class="divider"></div>
+      <h3 style="margin:0 0 8px 0;">PCB</h3>
+
+      <div class="row">
+        <div class="field">
+          <label for="pcbMaterial">PCB Material</label>
+          <input id="pcbMaterial" name="pcbMaterial" type="text" list="materialList2" placeholder="Select or type…" />
+          <datalist id="materialList2">
+            <option value="Stainless"></option>
+            <option value="Carbon Steel"></option>
+            <option value="Aluminum"></option>
+          </datalist>
         </div>
 
         <div class="field">
-          <label for="color">Finish / Color</label>
-          <input id="color" name="color" type="text" placeholder="e.g. Blue, ANSI 61, etc." />
+          <label for="pcbFinish">PCB Finish / Color</label>
+          <input id="pcbFinish" name="pcbFinish" type="text" placeholder="e.g. Blue, ANSI 61, etc." />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="pcbDoorCount">PCB Number of Doors</label>
+          <input id="pcbDoorCount" name="pcbDoorCount" type="number" min="0" step="1" value="1" />
+          <div class="hint">Set to 0 if no doors.</div>
+        </div>
+
+        <div class="field">
+          <label for="pcbLatchType">PCB Latch Type</label>
+          <input id="pcbLatchType" name="pcbLatchType" type="text" list="latchList2" placeholder="Select or type…" />
+          <datalist id="latchList2">
+            <option value="3-point"></option>
+            <option value="Quarter-turn"></option>
+            <option value="Padlockable"></option>
+            <option value="Keyed"></option>
+            <option value="Handle"></option>
+          </datalist>
         </div>
       </div>
 
@@ -135,7 +218,7 @@
       </div>
 
       <!-- =========================
-           FILE UPLOAD SECTION (ADDED)
+           FILE UPLOAD SECTION
            ========================= -->
       <div class="divider"></div>
       <h3 style="margin:0 0 8px 0;">Attachments</h3>
@@ -160,16 +243,12 @@
   </div>
 
   <script>
-    // ========= CONFIG =========
-    // Replace this with your actual n8n Webhook URL
-    const WEBHOOK_URL = "https://YOUR_N8N_DOMAIN/webhook/rfq-upload";
-    // ==========================
-
     const form = document.getElementById("rfqForm");
     const statusEl = document.getElementById("status");
     const clearBtn = document.getElementById("clearBtn");
     const filesEl = document.getElementById("rfqFiles");
     const fileListEl = document.getElementById("rfqFilesList");
+    const webhookInput = document.getElementById("webhookUrl");
 
     function renderSelectedFiles() {
       const files = Array.from(filesEl.files || []);
@@ -182,11 +261,25 @@
         .join("\n");
     }
 
+    // Load saved webhook URL (if any)
+    const savedWebhook = localStorage.getItem("n8nWebhookUrl");
+    if (savedWebhook) webhookInput.value = savedWebhook;
+
+    // Save webhook URL when changed
+    webhookInput.addEventListener("change", () => {
+      localStorage.setItem("n8nWebhookUrl", webhookInput.value.trim());
+    });
+
     filesEl.addEventListener("change", renderSelectedFiles);
     renderSelectedFiles();
 
     clearBtn.addEventListener("click", () => {
       form.reset();
+
+      // Restore webhook URL after reset (since it's intentionally persisted)
+      const saved = localStorage.getItem("n8nWebhookUrl");
+      if (saved) webhookInput.value = saved;
+
       // Reset file list UI
       fileListEl.textContent = "No files selected.";
       statusEl.textContent = "Cleared.";
@@ -195,26 +288,28 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      const webhookUrl = (webhookInput.value || "").trim();
+
+      if (!webhookUrl || !/^https?:\/\//i.test(webhookUrl)) {
+        statusEl.textContent = "Please enter a valid n8n Webhook URL (must start with http:// or https://).";
+        return;
+      }
+
       statusEl.textContent = "Submitting...";
 
-      // IMPORTANT:
-      // We use FormData so files are sent as multipart/form-data binaries.
-      // This includes all questionnaire fields automatically.
       const fd = new FormData(form);
 
-      // Ensure multi-file upload: append each file under the SAME key "files"
-      // (Some browsers already include it via FormData(form), but this is explicit and reliable.)
+      // Ensure multi-file upload under the same key "files"
       fd.delete("files");
       const files = Array.from(filesEl.files || []);
       for (const f of files) {
         fd.append("files", f, f.name);
       }
 
-      // Optional: include a count for easier debugging in n8n
       fd.append("uploadCount", String(files.length));
 
       try {
-        const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+        const res = await fetch(webhookUrl, { method: "POST", body: fd });
 
         const contentType = res.headers.get("content-type") || "";
         let bodyText;
