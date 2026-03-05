@@ -1,334 +1,934 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Morton Industries RFQ / Quote Intake</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RFQ Intake Form</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 24px; color: #111; }
-    .card { max-width: 920px; padding: 18px; border: 1px solid #ddd; border-radius: 10px; }
-    .row { display: flex; gap: 16px; flex-wrap: wrap; }
-    .field { flex: 1; min-width: 240px; margin: 10px 0; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; }
-    input[type="text"], input[type="number"], select, textarea {
-      width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
-      font-size: 14px; box-sizing: border-box;
+    :root {
+      --card: #ffffff;
+      --line: #d9e1ec;
+      --text: #1f2937;
+      --muted: #5b6472;
+      --accent: #145da0;
+      --danger: #b42318;
     }
-    textarea { min-height: 90px; }
-    .hint { font-size: 12px; color: #555; margin-top: 6px; }
-    button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
-    button.primary { background: #111; color: #fff; }
-    button.secondary { background: #eee; color: #111; }
-    pre { white-space: pre-wrap; background: #f7f7f7; padding: 12px; border-radius: 8px; border: 1px solid #eee; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    .divider { height: 1px; background: #eee; margin: 16px 0; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background: linear-gradient(145deg, #eef3fa, #f8fbff);
+    }
+    .page {
+      max-width: 1100px;
+      margin: 1.25rem auto;
+      padding: 0 1rem 2rem;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 980px) {
+      .page {
+        grid-template-columns: 1.6fr 0.9fr;
+        align-items: start;
+      }
+    }
+    h1 { margin: 0 0 .25rem; font-size: 1.6rem; }
+    .muted { color: var(--muted); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 14px rgba(18, 34, 52, 0.05);
+    }
+    .grid { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+    @media (min-width: 720px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .field { display: grid; gap: .3rem; }
+    label { font-weight: 600; }
+    .required::after { content: " *"; color: var(--danger); }
+    input, select, textarea, button {
+      font: inherit;
+      border: 1px solid #b8c5d6;
+      border-radius: 8px;
+      padding: .55rem .65rem;
+      background: #fff;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input:focus, select:focus, textarea:focus, button:focus {
+      outline: 2px solid #9bc2eb;
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+    button { cursor: pointer; background: #fff; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.danger { border-color: #dfc0bc; color: #8e1a10; }
+    button.secondary { border-color: #b8c5d6; color: #1f2937; }
+    fieldset { border: 1px solid var(--line); border-radius: 10px; margin: 0; padding: .75rem; }
+    legend { font-weight: 700; padding: 0 .2rem; }
+    .hidden { display: none !important; }
+    details { border: 1px solid var(--line); border-radius: 10px; padding: .65rem; background: #fbfdff; }
+    summary { cursor: pointer; font-weight: 700; margin: -.65rem; padding: .65rem; }
+    .set-body { margin-top: .7rem; }
+    .enclosure-card {
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+      padding: .65rem;
+      background: #fff;
+      margin-top: .5rem;
+    }
+    .error-list {
+      border: 1px solid #f0c2be;
+      background: #fff5f4;
+      color: #7f1d1d;
+      border-radius: 10px;
+      padding: .75rem 1rem;
+    }
+    .status {
+      border-radius: 10px;
+      padding: .65rem .8rem;
+      border: 1px solid transparent;
+      margin-top: .7rem;
+    }
+    .status.success { color: #114b26; background: #eaf8ef; border-color: #9dd3ae; }
+    .status.error { color: #7f1d1d; background: #fff3f2; border-color: #f1b8b3; }
+    .status.warn { color: #6c4700; background: #fff7e8; border-color: #ecd29a; }
+    .invalid { border-color: var(--danger) !important; background: #fff7f6; }
+    pre {
+      margin: .5rem 0 0;
+      background: #0f172a;
+      color: #c7d2fe;
+      padding: .8rem;
+      border-radius: 10px;
+      max-height: 340px;
+      overflow: auto;
+      font-size: .85rem;
+    }
+    .summary-kv {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: .5rem;
+    }
+    .summary-kv li { border-bottom: 1px dashed #dbe4f0; padding-bottom: .4rem; }
+    .summary-kv strong { display: inline-block; min-width: 140px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 style="margin:0 0 8px 0;">RFQ / Quote Intake</h2>
-    <div class="hint">Fill out the questionnaire and attach any drawings / RFQ docs. You can select multiple files.</div>
+  <div class="page">
+    <main class="card">
+      <h1>RFQ Intake Form</h1>
+      <p class="muted">Complete required fields marked with an asterisk (*).</p>
 
-    <form id="rfqForm">
-      <!-- =========================
-           INTEGRATION SECTION
-           ========================= -->
-      <div class="divider"></div>
-      <h3 style="margin:0 0 8px 0;">Integration</h3>
+      <div id="validationErrors" class="error-list hidden" role="alert" aria-live="assertive"></div>
+      <div id="submitStatus" class="status hidden" role="status" aria-live="polite"></div>
 
-      <div class="field">
-        <label for="webhookUrl">n8n Webhook URL</label>
-        <input
-          id="webhookUrl"
-          name="webhookUrl"
-          type="text"
-          class="mono"
-          placeholder="https://n8n.yourdomain.com/webhook/xyz"
-          required
-        />
-        <div class="hint">This is the n8n webhook that will receive the RFQ + files. It will be saved in this browser.</div>
-      </div>
+      <form id="rfqForm" novalidate>
+        <fieldset>
+          <legend>Header / Project Info</legend>
+          <div class="grid grid-2">
+            <div class="field">
+              <label for="rfq_number" class="required">RFQ number</label>
+              <input id="rfq_number" name="rfq_number" required>
+            </div>
+            <div class="field">
+              <label for="project_name">Project name</label>
+              <input id="project_name" name="project_name">
+            </div>
+            <div class="field">
+              <label for="company">Company</label>
+              <input id="company" name="company">
+            </div>
+            <div class="field">
+              <label for="contact_name" class="required">Contact name</label>
+              <input id="contact_name" name="contact_name" required>
+            </div>
+            <div class="field">
+              <label for="email" class="required">Email</label>
+              <input id="email" name="email" required inputmode="email" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input id="phone" name="phone" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="due_date">Quote due date</label>
+              <input id="due_date" name="due_date" type="date">
+            </div>
+          </div>
+          <div class="field" style="margin-top:.7rem;">
+            <label for="general_notes">General notes</label>
+            <textarea id="general_notes" name="general_notes"></textarea>
+          </div>
+        </fieldset>
 
-      <!-- =========================
-           QUESTIONNAIRE SECTION
-           ========================= -->
-      <div class="divider"></div>
-      <h3 style="margin:0 0 8px 0;">Questionnaire</h3>
+        <fieldset style="margin-top:.9rem;">
+          <legend>Product Family & Set Count</legend>
+          <div class="grid grid-2">
+            <div class="field">
+              <label for="product_family" class="required">Product family</label>
+              <select id="product_family" name="product_family" required>
+                <option value="">Select one</option>
+                <option value="enclosure_only">Enclosure Only</option>
+                <option value="internal_busbar_only">Internal Busbar Only</option>
+                <option value="switchboard">Switchboard</option>
+                <option value="switchgear">Switchgear</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="set_count" class="required">How many unique sets are you pricing?</label>
+              <input id="set_count" name="set_count" type="number" min="1" step="1" value="1" required>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button id="addSetBtn" type="button" class="secondary">Add another Set</button>
+            <button id="removeSetBtn" type="button" class="danger">Remove Set</button>
+          </div>
+        </fieldset>
 
-      <div class="row">
-        <div class="field">
-          <label for="rfqNumber">RFQ Number</label>
-          <input id="rfqNumber" name="rfqNumber" type="text" placeholder="RFQ-12345" />
+        <section id="setsContainer" style="margin-top:.9rem;" aria-label="Set sections"></section>
+
+        <fieldset style="margin-top:.9rem;">
+          <legend>Drawings (PDF)</legend>
+          <div class="field">
+            <label for="drawings">Attach PDF drawings (multiple allowed)</label>
+            <input id="drawings" name="drawings" type="file" accept="application/pdf,.pdf" multiple>
+          </div>
+          <p id="filesWarning" class="status warn hidden">JSON-only mode enabled: files will not be transmitted.</p>
+        </fieldset>
+
+        <details style="margin-top:.9rem;">
+          <summary>JSON Preview (before submit)</summary>
+          <pre id="jsonPreview">{}</pre>
+        </details>
+
+        <div class="btn-row" style="margin-top:1rem;">
+          <button type="button" id="downloadJsonBtn" class="secondary">Download JSON</button>
+          <button type="submit" class="primary">Submit RFQ</button>
         </div>
+      </form>
+    </main>
 
-        <div class="field">
-          <label for="customerName">Customer</label>
-          <input id="customerName" name="customerName" type="text" placeholder="Customer name" />
-        </div>
-
-        <div class="field">
-          <label for="enclosureType">Enclosure Type</label>
-          <input id="enclosureType" name="enclosureType" type="text" list="enclosureTypeList" placeholder="Select or type…" />
-          <datalist id="enclosureTypeList">
-            <option value="MCB"></option>
-            <option value="PNL"></option>
-            <option value="MCB + PNL"></option>
-          </datalist>
-          <div class="hint">Pick from the list or type a custom enclosure type.</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="application">Compliance / Certification Rating</label>
-          <input id="application" name="application" type="text" list="applicationList" placeholder="Select or type…" />
-          <datalist id="applicationList">
-            <option value="NEMA 3R (Outdoor)"></option>
-            <option value="NEMA 12 (Indoor)"></option>
-          </datalist>
-        </div>
-
-        <div class="field">
-          <label for="plant">Preferred Plant</label>
-          <input id="plant" name="plant" type="text" list="plantList" placeholder="Default (Fort Worth, TX) or type…" />
-          <datalist id="plantList">
-            <option value="Fort Worth, TX"></option>
-            <option value="Tennessee"></option>
-          </datalist>
-        </div>
-
-        <div class="field">
-          <label for="qty">Requested Quantity (base)</label>
-          <input id="qty" name="qty" type="number" min="1" step="1" value="1" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="mcbDimensions">MCB Dimensions (HxWxD)</label>
-          <input id="mcbDimensions" name="mcbDimensions" type="text" placeholder='e.g. 15x14x21' />
-        </div>
-
-        <div class="field">
-          <label for="pnlDimensions">PNL Dimensions (HxWxD)</label>
-          <input id="pnlDimensions" name="pnlDimensions" type="text" placeholder='e.g. 20x20x10' />
-        </div>
-
-        <div class="field">
-          <label for="includeSkid">Include Skid?</label>
-          <input id="includeSkid" name="includeSkid" type="text" list="includeSkidList" placeholder="Select or type…" value="no" />
-          <datalist id="includeSkidList">
-            <option value="no"></option>
-            <option value="yes"></option>
-          </datalist>
-        </div>
-      </div>
-
-      <!-- =========================
-           MCB CONFIG (ADDED)
-           ========================= -->
-      <div class="divider"></div>
-      <h3 style="margin:0 0 8px 0;">MCB</h3>
-
-      <div class="row">
-        <div class="field">
-          <label for="mcbMaterial">MCB Material</label>
-          <input id="mcbMaterial" name="mcbMaterial" type="text" list="materialList" placeholder="Select or type…" />
-          <datalist id="materialList">
-            <option value="Stainless"></option>
-            <option value="Carbon Steel"></option>
-            <option value="Aluminum"></option>
-          </datalist>
-        </div>
-
-        <div class="field">
-          <label for="mcbFinish">MCB Finish / Color</label>
-          <input id="mcbFinish" name="mcbFinish" type="text" placeholder="e.g. Blue, ANSI 61, etc." />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="mcbDoorCount">MCB Number of Doors</label>
-          <input id="mcbDoorCount" name="mcbDoorCount" type="number" min="0" step="1" value="1" />
-          <div class="hint">Set to 0 if no doors.</div>
-        </div>
-
-        <div class="field">
-          <label for="mcbLatchType">MCB Latch Type</label>
-          <input id="mcbLatchType" name="mcbLatchType" type="text" list="latchList" placeholder="Select or type…" />
-          <datalist id="latchList">
-            <option value="3-point"></option>
-            <option value="Quarter-turn"></option>
-            <option value="Padlockable"></option>
-            <option value="Keyed"></option>
-            <option value="Handle"></option>
-          </datalist>
-        </div>
-      </div>
-
-      <!-- =========================
-           PNL/PCB CONFIG (ADDED)
-           NOTE: User asked "PCB" - leaving it as PCB section label,
-           but keeping existing PNL dimensions field unchanged.
-           ========================= -->
-      <div class="divider"></div>
-      <h3 style="margin:0 0 8px 0;">PCB</h3>
-
-      <div class="row">
-        <div class="field">
-          <label for="pcbMaterial">PCB Material</label>
-          <input id="pcbMaterial" name="pcbMaterial" type="text" list="materialList2" placeholder="Select or type…" />
-          <datalist id="materialList2">
-            <option value="Stainless"></option>
-            <option value="Carbon Steel"></option>
-            <option value="Aluminum"></option>
-          </datalist>
-        </div>
-
-        <div class="field">
-          <label for="pcbFinish">PCB Finish / Color</label>
-          <input id="pcbFinish" name="pcbFinish" type="text" placeholder="e.g. Blue, ANSI 61, etc." />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="pcbDoorCount">PCB Number of Doors</label>
-          <input id="pcbDoorCount" name="pcbDoorCount" type="number" min="0" step="1" value="1" />
-          <div class="hint">Set to 0 if no doors.</div>
-        </div>
-
-        <div class="field">
-          <label for="pcbLatchType">PCB Latch Type</label>
-          <input id="pcbLatchType" name="pcbLatchType" type="text" list="latchList2" placeholder="Select or type…" />
-          <datalist id="latchList2">
-            <option value="3-point"></option>
-            <option value="Quarter-turn"></option>
-            <option value="Padlockable"></option>
-            <option value="Keyed"></option>
-            <option value="Handle"></option>
-          </datalist>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="notes">Notes / Requirements</label>
-        <textarea id="notes" name="notes" placeholder="Add any special requirements, cutouts, latches, NEMA rating, etc."></textarea>
-      </div>
-
-      <!-- =========================
-           FILE UPLOAD SECTION
-           ========================= -->
-      <div class="divider"></div>
-      <h3 style="margin:0 0 8px 0;">Attachments</h3>
-
-      <div class="field">
-        <label for="rfqFiles">Upload files (multiple allowed)</label>
-        <input id="rfqFiles" name="files" type="file" multiple />
-        <div id="rfqFilesList" class="mono hint">No files selected.</div>
-        <div class="hint">Supported: PDF, XLSX, DOCX, images. Select multiple files in one upload.</div>
-      </div>
-
-      <div class="divider"></div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button class="primary" type="submit">Submit to n8n</button>
-        <button class="secondary" type="button" id="clearBtn">Clear</button>
-      </div>
-    </form>
-
-    <div class="divider"></div>
-    <h3 style="margin:0 0 8px 0;">Status</h3>
-    <pre id="status" class="mono">Idle.</pre>
+    <aside class="card" aria-live="polite">
+      <h2 style="margin-top:0;">Running Summary</h2>
+      <ul class="summary-kv">
+        <li><strong>Product family:</strong> <span id="summaryFamily">-</span></li>
+        <li><strong>RFQ number:</strong> <span id="summaryRfq">-</span></li>
+        <li><strong>Total sets:</strong> <span id="summarySets">1</span></li>
+        <li><strong>Total enclosures:</strong> <span id="summaryEnclosures">0</span></li>
+        <li><strong>Total set quantities:</strong> <span id="summarySetQty">0</span></li>
+      </ul>
+    </aside>
   </div>
-
   <script>
-    const form = document.getElementById("rfqForm");
-    const statusEl = document.getElementById("status");
-    const clearBtn = document.getElementById("clearBtn");
-    const filesEl = document.getElementById("rfqFiles");
-    const fileListEl = document.getElementById("rfqFilesList");
-    const webhookInput = document.getElementById("webhookUrl");
+    // Configure your webhook endpoint and whether files should be sent as multipart/form-data.
+    const WEBHOOK_URL = "https://example.com/your-webhook";
+    const SEND_FILES = true;
 
-    function renderSelectedFiles() {
-      const files = Array.from(filesEl.files || []);
-      if (!files.length) {
-        fileListEl.textContent = "No files selected.";
-        return;
-      }
-      fileListEl.textContent = files
-        .map((f, i) => `${i + 1}. ${f.name} (${Math.round(f.size / 1024)} KB)`)
-        .join("\n");
+    const form = document.getElementById("rfqForm");
+    const setsContainer = document.getElementById("setsContainer");
+    const setCountInput = document.getElementById("set_count");
+    const productFamilyInput = document.getElementById("product_family");
+    const drawingsInput = document.getElementById("drawings");
+    const validationErrors = document.getElementById("validationErrors");
+    const submitStatus = document.getElementById("submitStatus");
+    const jsonPreview = document.getElementById("jsonPreview");
+    const filesWarning = document.getElementById("filesWarning");
+
+    const summaryFamily = document.getElementById("summaryFamily");
+    const summaryRfq = document.getElementById("summaryRfq");
+    const summarySets = document.getElementById("summarySets");
+    const summaryEnclosures = document.getElementById("summaryEnclosures");
+    const summarySetQty = document.getElementById("summarySetQty");
+
+    const productFamilyLabels = {
+      enclosure_only: "Enclosure Only",
+      internal_busbar_only: "Internal Busbar Only",
+      switchboard: "Switchboard",
+      switchgear: "Switchgear"
+    };
+
+    function showStatus(type, message) {
+      submitStatus.className = "status " + type;
+      submitStatus.textContent = message;
+      submitStatus.classList.remove("hidden");
     }
 
-    // Load saved webhook URL (if any)
-    const savedWebhook = localStorage.getItem("n8nWebhookUrl");
-    if (savedWebhook) webhookInput.value = savedWebhook;
+    function clearStatus() {
+      submitStatus.classList.add("hidden");
+      submitStatus.textContent = "";
+    }
 
-    // Save webhook URL when changed
-    webhookInput.addEventListener("change", () => {
-      localStorage.setItem("n8nWebhookUrl", webhookInput.value.trim());
-    });
+    function hasEnclosuresByFamily(family) {
+      return ["enclosure_only", "switchboard", "switchgear"].includes(family);
+    }
 
-    filesEl.addEventListener("change", renderSelectedFiles);
-    renderSelectedFiles();
+    function hasBusbarByFamily(family) {
+      return ["internal_busbar_only", "switchboard", "switchgear"].includes(family);
+    }
 
-    clearBtn.addEventListener("click", () => {
-      form.reset();
+    function toPositiveNumber(value) {
+      const n = Number(value);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    }
 
-      // Restore webhook URL after reset (since it's intentionally persisted)
-      const saved = localStorage.getItem("n8nWebhookUrl");
-      if (saved) webhookInput.value = saved;
+    function toIntAtLeast(value, min) {
+      const n = Number(value);
+      return Number.isInteger(n) && n >= min ? n : null;
+    }
 
-      // Reset file list UI
-      fileListEl.textContent = "No files selected.";
-      statusEl.textContent = "Cleared.";
-    });
+    function createSetBlock(index) {
+      const details = document.createElement("details");
+      details.className = "set-section";
+      details.open = true;
+      details.dataset.setIndex = String(index);
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+      details.innerHTML = `
+        <summary>Set ${index + 1}</summary>
+        <div class="set-body grid">
+          <div class="grid grid-2">
+            <div class="field">
+              <label for="set_label_${index}">Set name/label</label>
+              <input id="set_label_${index}" class="set-label">
+            </div>
+            <div class="field">
+              <label for="set_qty_${index}" class="required">Set quantity</label>
+              <input id="set_qty_${index}" class="set-qty" type="number" min="1" step="1" value="1" required>
+            </div>
+          </div>
 
-      const webhookUrl = (webhookInput.value || "").trim();
+          <div class="grid grid-2">
+            <div class="field">
+              <label for="app_type_${index}" class="required">Application type</label>
+              <select id="app_type_${index}" class="app-type" required>
+                <option value="">Select one</option>
+                <option>MCB</option>
+                <option>PCB</option>
+                <option>PNL</option>
+                <option>Motor Control</option>
+                <option>Power Distribution</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field app-type-other-wrap hidden">
+              <label for="app_type_other_${index}" class="required">application_type_other</label>
+              <input id="app_type_other_${index}" class="app-type-other">
+            </div>
+          </div>
 
-      if (!webhookUrl || !/^https?:\/\//i.test(webhookUrl)) {
-        statusEl.textContent = "Please enter a valid n8n Webhook URL (must start with http:// or https://).";
-        return;
+          <div class="field">
+            <label for="set_notes_${index}">Set-level notes</label>
+            <textarea id="set_notes_${index}" class="set-notes"></textarea>
+          </div>
+
+          <fieldset class="enclosures-wrap">
+            <legend>Enclosures in This Set</legend>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="enc_count_${index}" class="required">How many enclosures are in this set?</label>
+                <input id="enc_count_${index}" class="enclosure-count" type="number" min="1" step="1" value="1">
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="add-enclosure secondary">Add enclosure</button>
+              <button type="button" class="remove-enclosure danger">Remove enclosure</button>
+            </div>
+            <div class="enclosure-list"></div>
+          </fieldset>
+
+          <fieldset class="busbar-wrap">
+            <legend>Internal Components / Busbar</legend>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="busbar_include_${index}" class="required">Include internal busbar?</label>
+                <select id="busbar_include_${index}" class="busbar-include">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+            </div>
+            <div class="busbar-fields grid">
+              <div class="grid grid-3">
+                <div class="field">
+                  <label for="busbar_material_${index}">Material</label>
+                  <input id="busbar_material_${index}" class="busbar-material" value="Copper">
+                </div>
+                <div class="field">
+                  <label for="busbar_plating_${index}">Plating</label>
+                  <select id="busbar_plating_${index}" class="busbar-plating">
+                    <option>None</option>
+                    <option>Tin</option>
+                    <option>Silver</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field busbar-plating-other-wrap hidden">
+                  <label for="busbar_plating_other_${index}" class="required">Plating other</label>
+                  <input id="busbar_plating_other_${index}" class="busbar-plating-other">
+                </div>
+              </div>
+              <div class="grid grid-2">
+                <div class="field">
+                  <label for="busbar_amp_${index}">Amp rating</label>
+                  <input id="busbar_amp_${index}" class="busbar-amp" type="number" min="0" step="any">
+                </div>
+                <div class="field">
+                  <label for="busbar_notes_${index}">Busbar notes</label>
+                  <textarea id="busbar_notes_${index}" class="busbar-notes"></textarea>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      `;
+
+      const enclosureList = details.querySelector(".enclosure-list");
+      enclosureList.appendChild(createEnclosureBlock(index, 0));
+      bindSetEvents(details);
+      return details;
+    }
+
+    function createEnclosureBlock(setIndex, enclosureIndex) {
+      const card = document.createElement("div");
+      card.className = "enclosure-card";
+      card.dataset.enclosureIndex = String(enclosureIndex);
+      card.innerHTML = `
+        <h4 style="margin:.15rem 0 .6rem;">Enclosure ${enclosureIndex + 1}</h4>
+        <div class="grid grid-3">
+          <div class="field">
+            <label class="required" for="enc_height_${setIndex}_${enclosureIndex}">Height (inches)</label>
+            <input id="enc_height_${setIndex}_${enclosureIndex}" class="enc-height" type="number" min="0.0001" step="any" required>
+          </div>
+          <div class="field">
+            <label class="required" for="enc_width_${setIndex}_${enclosureIndex}">Width (inches)</label>
+            <input id="enc_width_${setIndex}_${enclosureIndex}" class="enc-width" type="number" min="0.0001" step="any" required>
+          </div>
+          <div class="field">
+            <label class="required" for="enc_depth_${setIndex}_${enclosureIndex}">Depth (inches)</label>
+            <input id="enc_depth_${setIndex}_${enclosureIndex}" class="enc-depth" type="number" min="0.0001" step="any" required>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label class="required" for="enc_material_${setIndex}_${enclosureIndex}">Material</label>
+            <select id="enc_material_${setIndex}_${enclosureIndex}" class="enc-material" required>
+              <option>12-gauge carbon steel (A1011 HRPO)</option>
+              <option>Carbon steel (other)</option>
+              <option>Stainless steel 304</option>
+              <option>Stainless steel 316</option>
+              <option>Aluminum</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field enc-material-other-wrap hidden">
+            <label class="required" for="enc_material_other_${setIndex}_${enclosureIndex}">Material other</label>
+            <input id="enc_material_other_${setIndex}_${enclosureIndex}" class="enc-material-other">
+          </div>
+          <div class="field">
+            <label class="required" for="enc_thickness_${setIndex}_${enclosureIndex}">Thickness / gauge</label>
+            <input id="enc_thickness_${setIndex}_${enclosureIndex}" class="enc-thickness" value="12" required>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label class="required" for="enc_environment_${setIndex}_${enclosureIndex}">Environment</label>
+            <select id="enc_environment_${setIndex}_${enclosureIndex}" class="enc-environment" required>
+              <option value="">Select one</option>
+              <option>Indoor</option>
+              <option>Outdoor</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="required" for="enc_rating_${setIndex}_${enclosureIndex}">NEMA rating</label>
+            <select id="enc_rating_${setIndex}_${enclosureIndex}" class="enc-rating" required>
+              <option value="">Select one</option>
+              <option value="NEMA 12">NEMA 12 (indoor)</option>
+              <option value="NEMA 3R">NEMA 3R (outdoor)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-3">
+          <div class="field">
+            <label for="enc_doors_${setIndex}_${enclosureIndex}">Number of doors</label>
+            <input id="enc_doors_${setIndex}_${enclosureIndex}" class="enc-doors-count" type="number" min="0" step="1" value="1">
+          </div>
+          <div class="field">
+            <label for="enc_latch_${setIndex}_${enclosureIndex}">Door type / latching</label>
+            <select id="enc_latch_${setIndex}_${enclosureIndex}" class="enc-door-latching">
+              <option>Single latch</option>
+              <option>3-point latch</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field enc-door-other-wrap hidden">
+            <label class="required" for="enc_latch_other_${setIndex}_${enclosureIndex}">Door latching other</label>
+            <input id="enc_latch_other_${setIndex}_${enclosureIndex}" class="enc-door-other">
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label for="enc_vents_${setIndex}_${enclosureIndex}">Has vents?</label>
+            <select id="enc_vents_${setIndex}_${enclosureIndex}" class="enc-has-vents">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="field enc-vent-details-wrap hidden">
+            <label for="enc_vent_details_${setIndex}_${enclosureIndex}">Vent details</label>
+            <input id="enc_vent_details_${setIndex}_${enclosureIndex}" class="enc-vent-details">
+          </div>
+        </div>
+        <div class="field">
+          <label for="enc_notes_${setIndex}_${enclosureIndex}">Additional enclosure notes</label>
+          <textarea id="enc_notes_${setIndex}_${enclosureIndex}" class="enc-notes"></textarea>
+        </div>
+      `;
+      bindEnclosureEvents(card);
+      return card;
+    }
+
+    function bindSetEvents(setEl) {
+      const appType = setEl.querySelector(".app-type");
+      const appTypeOtherWrap = setEl.querySelector(".app-type-other-wrap");
+      const appTypeOther = setEl.querySelector(".app-type-other");
+      const encCount = setEl.querySelector(".enclosure-count");
+      const addEncBtn = setEl.querySelector(".add-enclosure");
+      const removeEncBtn = setEl.querySelector(".remove-enclosure");
+      const busbarInclude = setEl.querySelector(".busbar-include");
+      const busbarFields = setEl.querySelector(".busbar-fields");
+      const busbarPlating = setEl.querySelector(".busbar-plating");
+      const busbarPlatingOtherWrap = setEl.querySelector(".busbar-plating-other-wrap");
+      const busbarPlatingOther = setEl.querySelector(".busbar-plating-other");
+
+      appType.addEventListener("change", () => {
+        const isOther = appType.value === "Other";
+        appTypeOtherWrap.classList.toggle("hidden", !isOther);
+        appTypeOther.required = isOther;
+        if (!isOther) appTypeOther.value = "";
+        refreshPreviewAndSummary();
+      });
+
+      encCount.addEventListener("input", () => {
+        const target = toIntAtLeast(encCount.value, 1) || 1;
+        encCount.value = String(target);
+        syncEnclosureCount(setEl, target);
+      });
+
+      addEncBtn.addEventListener("click", () => {
+        const current = setEl.querySelectorAll(".enclosure-card").length;
+        syncEnclosureCount(setEl, current + 1);
+      });
+
+      removeEncBtn.addEventListener("click", () => {
+        const current = setEl.querySelectorAll(".enclosure-card").length;
+        if (current > 1) syncEnclosureCount(setEl, current - 1);
+      });
+
+      busbarInclude.addEventListener("change", () => {
+        const include = busbarInclude.value === "true";
+        busbarFields.classList.toggle("hidden", !include);
+        if (!include) {
+          busbarPlatingOtherWrap.classList.add("hidden");
+          busbarPlatingOther.required = false;
+          busbarPlatingOther.value = "";
+        }
+        refreshPreviewAndSummary();
+      });
+
+      busbarPlating.addEventListener("change", () => {
+        const isOther = busbarPlating.value === "Other";
+        busbarPlatingOtherWrap.classList.toggle("hidden", !isOther);
+        busbarPlatingOther.required = isOther;
+        if (!isOther) busbarPlatingOther.value = "";
+        refreshPreviewAndSummary();
+      });
+
+      setEl.addEventListener("input", refreshPreviewAndSummary);
+      setEl.addEventListener("change", refreshPreviewAndSummary);
+      updateSetVisibilityRules(setEl);
+    }
+
+    function bindEnclosureEvents(card) {
+      const material = card.querySelector(".enc-material");
+      const materialOtherWrap = card.querySelector(".enc-material-other-wrap");
+      const materialOther = card.querySelector(".enc-material-other");
+      const environment = card.querySelector(".enc-environment");
+      const rating = card.querySelector(".enc-rating");
+      const doorLatch = card.querySelector(".enc-door-latching");
+      const doorOtherWrap = card.querySelector(".enc-door-other-wrap");
+      const doorOther = card.querySelector(".enc-door-other");
+      const hasVents = card.querySelector(".enc-has-vents");
+      const ventWrap = card.querySelector(".enc-vent-details-wrap");
+      const ventDetails = card.querySelector(".enc-vent-details");
+
+      material.addEventListener("change", () => {
+        const isOther = material.value === "Other";
+        materialOtherWrap.classList.toggle("hidden", !isOther);
+        materialOther.required = isOther;
+        if (!isOther) materialOther.value = "";
+        refreshPreviewAndSummary();
+      });
+
+      // Enforce environment/rating mapping: Indoor -> NEMA 12, Outdoor -> NEMA 3R.
+      environment.addEventListener("change", () => {
+        const isIndoor = environment.value === "Indoor";
+        const isOutdoor = environment.value === "Outdoor";
+        const opts = rating.options;
+        for (let i = 0; i < opts.length; i++) {
+          const val = opts[i].value;
+          if (!val) continue;
+          if (val === "NEMA 12") opts[i].disabled = !isIndoor;
+          if (val === "NEMA 3R") opts[i].disabled = !isOutdoor;
+        }
+        if (isIndoor) rating.value = "NEMA 12";
+        if (isOutdoor) rating.value = "NEMA 3R";
+        if (!isIndoor && !isOutdoor) rating.value = "";
+        refreshPreviewAndSummary();
+      });
+
+      doorLatch.addEventListener("change", () => {
+        const isOther = doorLatch.value === "Other";
+        doorOtherWrap.classList.toggle("hidden", !isOther);
+        doorOther.required = isOther;
+        if (!isOther) doorOther.value = "";
+        refreshPreviewAndSummary();
+      });
+
+      hasVents.addEventListener("change", () => {
+        const yes = hasVents.value === "true";
+        ventWrap.classList.toggle("hidden", !yes);
+        if (!yes) ventDetails.value = "";
+        refreshPreviewAndSummary();
+      });
+      card.addEventListener("input", refreshPreviewAndSummary);
+      card.addEventListener("change", refreshPreviewAndSummary);
+    }
+
+    function syncSetCount(targetCount) {
+      const count = Math.max(1, targetCount);
+      const current = setsContainer.querySelectorAll(".set-section").length;
+      if (count > current) {
+        for (let i = current; i < count; i++) setsContainer.appendChild(createSetBlock(i));
+      } else if (count < current) {
+        for (let i = current; i > count; i--) setsContainer.lastElementChild.remove();
       }
+      renumberSets();
+      setCountInput.value = String(count);
+      refreshPreviewAndSummary();
+    }
 
-      statusEl.textContent = "Submitting...";
-
-      const fd = new FormData(form);
-
-      // Ensure multi-file upload under the same key "files"
-      fd.delete("files");
-      const files = Array.from(filesEl.files || []);
-      for (const f of files) {
-        fd.append("files", f, f.name);
+    function syncEnclosureCount(setEl, targetCount) {
+      const list = setEl.querySelector(".enclosure-list");
+      const encCountInput = setEl.querySelector(".enclosure-count");
+      const setIdx = Number(setEl.dataset.setIndex) || 0;
+      const count = Math.max(1, targetCount);
+      const current = list.querySelectorAll(".enclosure-card").length;
+      if (count > current) {
+        for (let i = current; i < count; i++) list.appendChild(createEnclosureBlock(setIdx, i));
+      } else if (count < current) {
+        for (let i = current; i > count; i--) list.lastElementChild.remove();
       }
+      encCountInput.value = String(count);
+      renumberEnclosures(setEl);
+      refreshPreviewAndSummary();
+    }
 
-      fd.append("uploadCount", String(files.length));
+    function renumberSets() {
+      const sets = setsContainer.querySelectorAll(".set-section");
+      sets.forEach((setEl, idx) => {
+        setEl.dataset.setIndex = String(idx);
+        setEl.querySelector("summary").textContent = `Set ${idx + 1}`;
+        renumberEnclosures(setEl);
+        updateSetVisibilityRules(setEl);
+      });
+      document.getElementById("removeSetBtn").disabled = sets.length <= 1;
+    }
 
-      try {
-        const res = await fetch(webhookUrl, { method: "POST", body: fd });
+    function renumberEnclosures(setEl) {
+      const cards = setEl.querySelectorAll(".enclosure-card");
+      cards.forEach((card, idx) => {
+        card.dataset.enclosureIndex = String(idx);
+        card.querySelector("h4").textContent = `Enclosure ${idx + 1}`;
+      });
+      setEl.querySelector(".remove-enclosure").disabled = cards.length <= 1;
+    }
 
-        const contentType = res.headers.get("content-type") || "";
-        let bodyText;
-        if (contentType.includes("application/json")) {
-          const json = await res.json();
-          bodyText = JSON.stringify(json, null, 2);
-        } else {
-          bodyText = await res.text();
+    function updateSetVisibilityRules(setEl) {
+      const family = productFamilyInput.value;
+      const showEnclosures = hasEnclosuresByFamily(family);
+      const showBusbar = hasBusbarByFamily(family);
+
+      const encWrap = setEl.querySelector(".enclosures-wrap");
+      const encCount = setEl.querySelector(".enclosure-count");
+      const addEncBtn = setEl.querySelector(".add-enclosure");
+      const remEncBtn = setEl.querySelector(".remove-enclosure");
+      const busbarWrap = setEl.querySelector(".busbar-wrap");
+      const busbarInclude = setEl.querySelector(".busbar-include");
+      const busbarFields = setEl.querySelector(".busbar-fields");
+
+      encWrap.classList.toggle("hidden", !showEnclosures);
+      encCount.required = showEnclosures;
+      encCount.disabled = !showEnclosures;
+      addEncBtn.disabled = !showEnclosures;
+      remEncBtn.disabled = !showEnclosures || setEl.querySelectorAll(".enclosure-card").length <= 1;
+      setEl.querySelectorAll(".enclosure-card input, .enclosure-card select, .enclosure-card textarea")
+        .forEach(el => { el.disabled = !showEnclosures; });
+
+      busbarWrap.classList.toggle("hidden", !showBusbar);
+      setEl.querySelectorAll(".busbar-wrap input, .busbar-wrap select, .busbar-wrap textarea")
+        .forEach(el => { el.disabled = !showBusbar; });
+      if (showBusbar) {
+        busbarInclude.disabled = false;
+        if (family === "internal_busbar_only") busbarInclude.value = "true";
+        busbarFields.classList.toggle("hidden", busbarInclude.value !== "true");
+      }
+    }
+
+    function buildPayload() {
+      const family = productFamilyInput.value;
+      const includeEnclosures = hasEnclosuresByFamily(family);
+      const includeBusbar = hasBusbarByFamily(family);
+      const payload = {
+        rfq_number: document.getElementById("rfq_number").value.trim(),
+        product_family: family,
+        contact: {
+          company: document.getElementById("company").value.trim(),
+          project_name: document.getElementById("project_name").value.trim(),
+          name: document.getElementById("contact_name").value.trim(),
+          email: document.getElementById("email").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          due_date: document.getElementById("due_date").value || ""
+        },
+        general_notes: document.getElementById("general_notes").value.trim(),
+        sets: []
+      };
+
+      const setEls = setsContainer.querySelectorAll(".set-section");
+      setEls.forEach((setEl) => {
+        const setData = {
+          set_label: setEl.querySelector(".set-label").value.trim(),
+          set_quantity: Number(setEl.querySelector(".set-qty").value),
+          application_type: setEl.querySelector(".app-type").value,
+          application_type_other: "",
+          set_notes: setEl.querySelector(".set-notes").value.trim(),
+          enclosures: [],
+          internal_busbar: {
+            include: false,
+            material: "Copper",
+            plating: "None",
+            plating_other: "",
+            amp_rating: null,
+            notes: ""
+          }
+        };
+
+        if (setData.application_type === "Other") {
+          setData.application_type_other = setEl.querySelector(".app-type-other").value.trim();
         }
 
-        statusEl.textContent =
-          `Server response (${res.status})\n` +
-          `Files sent: ${files.length}\n\n` +
-          bodyText;
+        if (includeEnclosures) {
+          setEl.querySelectorAll(".enclosure-card").forEach((encEl) => {
+            const hasVents = encEl.querySelector(".enc-has-vents").value === "true";
+            const doorLatching = encEl.querySelector(".enc-door-latching").value;
+            const materialVal = encEl.querySelector(".enc-material").value;
+            setData.enclosures.push({
+              height_in: Number(encEl.querySelector(".enc-height").value),
+              width_in: Number(encEl.querySelector(".enc-width").value),
+              depth_in: Number(encEl.querySelector(".enc-depth").value),
+              material: materialVal,
+              material_other: materialVal === "Other" ? encEl.querySelector(".enc-material-other").value.trim() : "",
+              thickness_value: encEl.querySelector(".enc-thickness").value.trim(),
+              environment: encEl.querySelector(".enc-environment").value,
+              nema_rating: encEl.querySelector(".enc-rating").value,
+              doors_count: Number(encEl.querySelector(".enc-doors-count").value || 0),
+              door_latching: doorLatching,
+              door_latching_other: doorLatching === "Other" ? encEl.querySelector(".enc-door-other").value.trim() : "",
+              has_vents: hasVents,
+              vent_details: hasVents ? encEl.querySelector(".enc-vent-details").value.trim() : "",
+              enclosure_notes: encEl.querySelector(".enc-notes").value.trim()
+            });
+          });
+        }
 
-      } catch (err) {
-        statusEl.textContent = "Submit failed: " + err.message;
+        if (includeBusbar) {
+          const include = setEl.querySelector(".busbar-include").value === "true";
+          const plating = setEl.querySelector(".busbar-plating").value;
+          const ampRaw = setEl.querySelector(".busbar-amp").value;
+          setData.internal_busbar = {
+            include,
+            material: setEl.querySelector(".busbar-material").value.trim() || "Copper",
+            plating,
+            plating_other: plating === "Other" ? setEl.querySelector(".busbar-plating-other").value.trim() : "",
+            amp_rating: ampRaw === "" ? null : Number(ampRaw),
+            notes: setEl.querySelector(".busbar-notes").value.trim()
+          };
+        }
+        payload.sets.push(setData);
+      });
+      return payload;
+    }
+
+    function validateForm() {
+      const errors = [];
+      let firstInvalid = null;
+      const addError = (el, msg) => {
+        errors.push(msg);
+        if (el) {
+          el.classList.add("invalid");
+          el.setAttribute("aria-invalid", "true");
+          if (!firstInvalid) firstInvalid = el;
+        }
+      };
+      form.querySelectorAll(".invalid").forEach((el) => {
+        el.classList.remove("invalid");
+        el.removeAttribute("aria-invalid");
+      });
+
+      const family = productFamilyInput.value;
+      const includeEnclosures = hasEnclosuresByFamily(family);
+      const includeBusbar = hasBusbarByFamily(family);
+
+      if (!document.getElementById("rfq_number").value.trim()) addError(document.getElementById("rfq_number"), "RFQ number is required.");
+      if (!document.getElementById("contact_name").value.trim()) addError(document.getElementById("contact_name"), "Contact name is required.");
+      if (!family) addError(productFamilyInput, "Product family is required.");
+
+      const email = document.getElementById("email");
+      const emailVal = email.value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailVal) addError(email, "Email is required.");
+      else if (!emailRegex.test(emailVal)) addError(email, "Email format is invalid.");
+
+      if (!toIntAtLeast(setCountInput.value, 1)) addError(setCountInput, "Unique set count must be an integer >= 1.");
+
+      setsContainer.querySelectorAll(".set-section").forEach((setEl, i) => {
+        if (!toIntAtLeast(setEl.querySelector(".set-qty").value, 1)) addError(setEl.querySelector(".set-qty"), `Set ${i + 1}: set quantity must be an integer >= 1.`);
+        const appType = setEl.querySelector(".app-type").value;
+        if (!appType) addError(setEl.querySelector(".app-type"), `Set ${i + 1}: application type is required.`);
+        if (appType === "Other" && !setEl.querySelector(".app-type-other").value.trim()) addError(setEl.querySelector(".app-type-other"), `Set ${i + 1}: application_type_other is required.`);
+
+        if (includeEnclosures) {
+          if (!toIntAtLeast(setEl.querySelector(".enclosure-count").value, 1)) addError(setEl.querySelector(".enclosure-count"), `Set ${i + 1}: enclosure count must be an integer >= 1.`);
+          setEl.querySelectorAll(".enclosure-card").forEach((encEl, j) => {
+            if (!toPositiveNumber(encEl.querySelector(".enc-height").value)) addError(encEl.querySelector(".enc-height"), `Set ${i + 1}, enclosure ${j + 1}: height must be positive.`);
+            if (!toPositiveNumber(encEl.querySelector(".enc-width").value)) addError(encEl.querySelector(".enc-width"), `Set ${i + 1}, enclosure ${j + 1}: width must be positive.`);
+            if (!toPositiveNumber(encEl.querySelector(".enc-depth").value)) addError(encEl.querySelector(".enc-depth"), `Set ${i + 1}, enclosure ${j + 1}: depth must be positive.`);
+            if (!toPositiveNumber(encEl.querySelector(".enc-thickness").value)) addError(encEl.querySelector(".enc-thickness"), `Set ${i + 1}, enclosure ${j + 1}: thickness/gauge must be positive.`);
+            if (encEl.querySelector(".enc-material").value === "Other" && !encEl.querySelector(".enc-material-other").value.trim()) addError(encEl.querySelector(".enc-material-other"), `Set ${i + 1}, enclosure ${j + 1}: material other is required.`);
+            const env = encEl.querySelector(".enc-environment").value;
+            const rating = encEl.querySelector(".enc-rating").value;
+            if (!env) addError(encEl.querySelector(".enc-environment"), `Set ${i + 1}, enclosure ${j + 1}: environment is required.`);
+            if (!rating) addError(encEl.querySelector(".enc-rating"), `Set ${i + 1}, enclosure ${j + 1}: NEMA rating is required.`);
+            if (env === "Indoor" && rating !== "NEMA 12") addError(encEl.querySelector(".enc-rating"), `Set ${i + 1}, enclosure ${j + 1}: indoor must use NEMA 12.`);
+            if (env === "Outdoor" && rating !== "NEMA 3R") addError(encEl.querySelector(".enc-rating"), `Set ${i + 1}, enclosure ${j + 1}: outdoor must use NEMA 3R.`);
+            if (toIntAtLeast(encEl.querySelector(".enc-doors-count").value, 0) === null) addError(encEl.querySelector(".enc-doors-count"), `Set ${i + 1}, enclosure ${j + 1}: number of doors must be an integer >= 0.`);
+            if (encEl.querySelector(".enc-door-latching").value === "Other" && !encEl.querySelector(".enc-door-other").value.trim()) addError(encEl.querySelector(".enc-door-other"), `Set ${i + 1}, enclosure ${j + 1}: door latching other is required.`);
+          });
+        }
+
+        if (includeBusbar && setEl.querySelector(".busbar-include").value === "true") {
+          if (setEl.querySelector(".busbar-plating").value === "Other" && !setEl.querySelector(".busbar-plating-other").value.trim()) {
+            addError(setEl.querySelector(".busbar-plating-other"), `Set ${i + 1}: plating other is required.`);
+          }
+        }
+      });
+
+      if (errors.length) {
+        validationErrors.classList.remove("hidden");
+        validationErrors.innerHTML = `<strong>Please fix the following:</strong><ul>${errors.map(e => `<li>${e}</li>`).join("")}</ul>`;
+        if (firstInvalid) firstInvalid.focus();
+      } else {
+        validationErrors.classList.add("hidden");
+        validationErrors.textContent = "";
+      }
+      return errors.length === 0;
+    }
+
+    function refreshPreviewAndSummary() {
+      const payload = buildPayload();
+      jsonPreview.textContent = JSON.stringify(payload, null, 2);
+      summaryFamily.textContent = productFamilyLabels[payload.product_family] || "-";
+      summaryRfq.textContent = payload.rfq_number || "-";
+      summarySets.textContent = String(payload.sets.length);
+      summarySetQty.textContent = String(payload.sets.reduce((s, x) => s + (Number(x.set_quantity) || 0), 0));
+      summaryEnclosures.textContent = String(payload.sets.reduce((s, x) => s + (Array.isArray(x.enclosures) ? x.enclosures.length : 0), 0));
+    }
+
+    async function submitPayload(payload) {
+      if (!SEND_FILES) {
+        filesWarning.classList.remove("hidden");
+        showStatus("warn", "JSON-only mode is active (SEND_FILES=false). Files will not be transmitted.");
+        const resp = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const text = await resp.text();
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text || "No response body"}`);
+        return { mode: "json", detail: text || `HTTP ${resp.status}` };
+      }
+
+      filesWarning.classList.add("hidden");
+      const fd = new FormData();
+      fd.append("payload_json", JSON.stringify(payload));
+      for (let i = 0; i < drawingsInput.files.length; i++) {
+        fd.append("drawings", drawingsInput.files[i], drawingsInput.files[i].name);
+      }
+      const resp = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+      const text = await resp.text();
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${text || "No response body"}`);
+      return { mode: "multipart", detail: text || `HTTP ${resp.status}` };
+    }
+
+    document.getElementById("addSetBtn").addEventListener("click", () => syncSetCount((toIntAtLeast(setCountInput.value, 1) || 1) + 1));
+    document.getElementById("removeSetBtn").addEventListener("click", () => syncSetCount(Math.max(1, (toIntAtLeast(setCountInput.value, 1) || 1) - 1)));
+    setCountInput.addEventListener("input", () => {
+      const val = toIntAtLeast(setCountInput.value, 1);
+      if (val) syncSetCount(val);
+    });
+    productFamilyInput.addEventListener("change", () => {
+      setsContainer.querySelectorAll(".set-section").forEach(updateSetVisibilityRules);
+      refreshPreviewAndSummary();
+    });
+    form.addEventListener("input", refreshPreviewAndSummary);
+    form.addEventListener("change", refreshPreviewAndSummary);
+
+    document.getElementById("downloadJsonBtn").addEventListener("click", () => {
+      const payload = buildPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const rfq = payload.rfq_number ? payload.rfq_number.replace(/[^\w.-]+/g, "_") : "rfq_payload";
+      a.href = url;
+      a.download = `${rfq}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearStatus();
+      if (!validateForm()) return;
+      const payload = buildPayload();
+      refreshPreviewAndSummary();
+      try {
+        const result = await submitPayload(payload);
+        showStatus("success", `Submission successful (${result.mode}). Details: ${result.detail}`);
+      } catch (error) {
+        showStatus("error", `Submission failed. ${error instanceof Error ? error.message : String(error)}`);
       }
     });
+
+    syncSetCount(1);
+    refreshPreviewAndSummary();
+    if (!SEND_FILES) filesWarning.classList.remove("hidden");
   </script>
 </body>
 </html>
